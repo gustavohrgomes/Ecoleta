@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi'
+import { FiArrowLeft } from 'react-icons/fi';
+import { Map, TileLayer, Marker } from 'react-leaflet';
+import api from '../../services/api';
 
 import './styles.css';
 
 import logo from '../../assets/logo.svg';
 
+// sempre que criamos um estado para um array ou objeto, precisamos manualmente informar o tipo da variável que vai ser armazenada alí dentro
+
+interface Item {
+  id: number,
+  title: string,
+  image_url: string
+}
+
 const CreatePoint = () => {
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    api.get('items')
+      .then(response => {
+        setItems(response.data);
+      })
+  }, [])
+
   return (
     <div id="page-create-point">
       <div className="content">
@@ -60,6 +79,15 @@ const CreatePoint = () => {
               <span>Selectione um endereço no mapa</span>
             </legend>
 
+            <Map center={[-21.7928248, -48.1697339]} zoom={15}>
+              <TileLayer
+                attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              <Marker position={[-21.7928248, -48.1697339]} />
+            </Map>
+
             <div className="field-group">
               <div className="field">
                 <label htmlFor="uf">Estado</label>
@@ -82,37 +110,19 @@ const CreatePoint = () => {
               <h2>Ítens de coleta</h2>
               <span>Selectione um ou mais itens abaixo</span>
             </legend>
-
+          
             <ul className="items-grid">
-              <li>
-                <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                <span>Óleo de cozinha</span>
-              </li>
-              <li className="selected">
-                <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                <span>Óleo de cozinha</span>
-              </li>
-              <li>
-                <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                <span>Óleo de cozinha</span>
-              </li>
-              <li>
-                <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                <span>Óleo de cozinha</span>
-              </li>
-              <li>
-                <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                <span>Óleo de cozinha</span>
-              </li>
-              <li>
-                <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                <span>Óleo de cozinha</span>
-              </li>              
+              {items.map(item => (
+                <li key={item.id}>
+                  <img src={item.image_url} alt={item.title} />
+                  <span>{item.title}</span>
+                </li>
+              ))}
             </ul>
           </fieldset>
 
           <button type="submit">
-              Cadastrar Ponto de Coleta
+            Cadastrar Ponto de Coleta
             </button>
         </form>
       </div>
